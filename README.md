@@ -1,0 +1,2 @@
+# Upbit-Autotrader
+for autotrading
