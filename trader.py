@@ -4,11 +4,8 @@ from urllib.parse import urlencode
 from requests import get, post, delete
 from jwt import encode
 
-ACCESS_KEY = "E10F3xqOUGAYxxFmExfGBo2xxx5Q1IsrpHqDszgx"
-SECRET_KEY = "1DjcP3cRxk7J4ymY4xkDxcnt9R1hXRT68FHDv3x3"
-
-# Start with "_" is private function normally
-# Implicit promise of no use in external modules
+ACCESS_KEY = ""
+SECRET_KEY = ""
 
 ##############################################################
 
@@ -84,6 +81,7 @@ def order(market, side, volume, price, ord_type):
     return resp_data    
 
 def order_list(state="wait", page=1):
+    # order details(list)
     query = {
         "state": state,
         "page": page
@@ -108,6 +106,7 @@ def order_list(state="wait", page=1):
     return resp_data
 
 def order_cancle(uuid):
+    # order cancellation
     query = {
         "uuid": uuid
     }
@@ -147,8 +146,7 @@ def candle_minute(market):
 ##############################################################
 
 def main():
-    resp = order_cancle("0d3173e5-3a5a-42bf-ab26-951918ac15e8")
-    pprint(resp)
+    #TODO
 
 if __name__ == '__main__':
     main()
