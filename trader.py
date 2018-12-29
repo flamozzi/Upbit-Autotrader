@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 from requests import get, post
 from jwt import encode
 
-ACCESS_KEY = "E10F3xqOUGAYxxFmExfGBo2xxx5Q1IsrpHqDszgx"
-SECRET_KEY = "1DjcP3cRxk7J4ymY4xkDxcnt9R1hXRT68FHDv3x3"
+ACCESS_KEY = ""
+SECRET_KEY = ""
 
 # Start with "_" is private function normally
 # Implicit promise of no use in external modules
@@ -83,11 +83,15 @@ def order(market, side, volume, price, ord_type):
     resp_data = resp.json()
     return resp_data    
 
+def ticker(market):
+    url = "https://api.upbit.com/v1/ticker?markets=" + market
+    resp = get(url)
+    return resp.json()
+
 ####################################################    
 
 def main():
-    resp_data = order("KRW-BTC", "bid", "0.00027979", "4289000", "limit")
-    pprint(resp_data)
+    pprint(ticker("KRW-BTC"))
 
 if __name__ == '__main__':
     main()
