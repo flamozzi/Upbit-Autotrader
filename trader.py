@@ -136,17 +136,108 @@ def ticker(markets):
     resp_data = resp.json()
     return resp_data
 
-def candle_minute(market):
+def extension_list(before_list, unit):
+    ex_list = []
+    for i in before_list:
+        for _ in range(0, int(unit)):
+            ex_list.append(i)
+    return ex_list
+
+def candle_minute(market, to="", count=1, unit=1):
     # candle information for minute
-    url = "https://api.upbit.com/v1/candles/minutes/1?market=" + market
+    # unit == string type
+    param = {"market": market, "to": to, "count": count}
+    url = "https://api.upbit.com/v1/candles/minutes/" + unit + "?" + urlencode(param)
+    resp = get(url)
+    resp_data = resp.json()
+    trade_price_list = []
+    for i in range(0, count):
+        trade_price_list.append(resp_data[i]["trade_price"])
+    return extension_list(trade_price_list, unit)
+
+def candle_day(market, to="", count=1):
+    # candle information for day
+    param = {"market": market, "to": to, "count": count}
+    url = "https://api.upbit.com/v1/candles/days?" + urlencode(param)
     resp = get(url)
     resp_data = resp.json()
     return resp_data
 
+
+def make_EMA(param_list):
+    ema = .0
+    copy_list = param_list
+    copy_list.reverse()
+    ema_list = []
+    for i in range(0, 200):
+        if i == 0:
+            ema = copy_list[i]
+        else:
+            k = float(2/(i+2))
+            ema = (copy_list[i]*k) + (ema*(1-k))
+        ema_list.append(ema)
+    ema_list.reverse()
+    return ema_list
+
+def make_MACD(medium_ema, long_ema):
+    MACD = []
+    for i in range(0, 200):
+        MACD.append(medium_ema[i] - long_ema[i])
+    return MACD
+
+def make_Oscillator(macd, signal):
+    Oscillator = []
+    for i in range(0, 200):
+        Oscillator.append(macd[i] - signal[i])
+    return Oscillator
+
 ##############################################################
 
 def main():
-    pass
+    # 지수이동평균: (c*k)+(xp*(1-k))
+    # c = 종가, k = 2/(n+1), n = n일, xp = 전일지수이평
+
+    # 확장된 list들
+    medium_list = candle_minute("KRW-BTC", count=40, unit="5")
+    long_list = candle_minute("KRW-BTC", count=20, unit="10")
+
+    medium_ema = make_EMA(medium_list)
+    long_ema = make_EMA(long_list)
+    
+    #########################################
+    #평가 기준
+    #########################################
+
+    MACD = make_MACD(medium_ema, long_ema)
+
+    Signal = make_EMA(MACD)
+
+    Oscillator = make_Oscillator(MACD, Signal)
+
+    ##########################################
+    #매매 판단
+    ##########################################
+
+    # 0. MACD와 시그널의 골든 크로스 -> 매수사인 +1
+    #    MACD와 시그널의 데드 크로스 -> 매도사인 -1
+    # 1. MACD와 시그널이 골든 크로스 후 2개의 선이 제로선을 웃돈다 -애매
+    #    MACD와 시그널이 데드 크로스 후 2개의 선이 제로선을 밑돈다 -애매
+    # 2. MACD의 상승 == 가격의 상승 경향 +1
+    #    MACD의 하락 == 가격의 하락 경향 -1
+    # 3. MACD의 0(제로)는 MACD와 시그널의 크로스를 의미한다.
+    # 4. MACD의 천장 - 상승 추세에서 가격이 상승, 상향 힘을 약화 == MACD는 천장을 친다. -1
+    #    MACD의 바닥 - 하향 추세에서 가격이 하락, 하향 힘을 약화 == MACD는 바닥을 친다. +1
+    # 5. 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정된다.
+    #    가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정된다.
+
+    ###########################################
+    
+    print("turn on the trader!")
+    sell_count = 0
+    while True:
+
+
+##############################################################
 
 if __name__ == '__main__':
     main()
