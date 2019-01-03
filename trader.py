@@ -229,12 +229,57 @@ def main():
     #    MACD의 바닥 - 하향 추세에서 가격이 하락, 하향 힘을 약화 == MACD는 바닥을 친다. +1
     # 5. 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정된다.
     #    가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정된다.
+    # 6. 감소하고 있던 오실레이터가 증가로 전환 +1
+    #    증가하고 있던 오실레이터가 감소로 전환 -1
 
     ###########################################
     
     print("turn on the trader!")
     sell_count = 0
+
     while True:
+        print("판단 근거 확인")
+
+        print("0.MACD의 상승 및 하락 확인")
+        if MACD[0] > MACD[1]:
+            sell_count += 1
+            print("MACD의 상승 추세")
+        elif MACD[0] < MACD[1]:
+            sell_count -= 1
+            print("MACD의 하락 추세")
+        print("sell_count": sell_count)
+
+        print("1.골든 크로스 및 데드 크로스 확인")
+        for i in range(0, 200):
+            Check_Cross = MACD[i] - Signal[i]
+            if Check_Cross < 0:
+                if Check_Cross == 0:
+                    print("Cross!")
+                    if
+            if Check_Cross == 0:
+                print("Cross sign")
+        # Cross 미완성 TODO
+
+        print("2.MACD의 천장 및 바닥 확인")
+        # TODO
+
+        print("3.Oscillator 상승 및 하락 확인")
+        # TODO
+
+        # 최종 매매 판단
+        if sell_count > 0:
+            #매수
+        else if sell_count < 0:
+            #매도
+
+
+
+        # 시세 계속 확인(MACD, 단순 시세, 시그널 등)
+
+    # 각각 요인들을 확인하고 sell_count를 조정
+    # sell_count가 양수일 경우 -> 매수
+    # sell_count가 음수일 경우 -> 매도
+    # 초기 프로토 타입은 BTC로만 작동
 
 
 ##############################################################
