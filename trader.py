@@ -247,30 +247,51 @@ def main():
         elif MACD[0] < MACD[1]:
             sell_count -= 1
             print("MACD의 하락 추세")
-        print("sell_count": sell_count)
+        print("sell_count: " + sell_count)
 
         print("1.골든 크로스 및 데드 크로스 확인")
+        # 진성 및 가성 판단할 필요가 있음
+        # 진성 golden&death cross graph 개형 확인
+        # fake cross에 유의하여 수수료 낭비하지 않기
         for i in range(0, 200):
-            Check_Cross = MACD[i] - Signal[i]
-            if Check_Cross < 0:
-                if Check_Cross == 0:
-                    print("Cross!")
-                    if
-            if Check_Cross == 0:
-                print("Cross sign")
-        # Cross 미완성 TODO
+            if MACD[i+1] < MACD[i]:
+                if MACD[i+1] - Signal[i+1] < 0 and MACD[i] - Signal[i] > 0:
+                    print("Golden Cross Occurred!")
+                    sell_count += 1
+                    break
+            elif MACD[i+1] > MACD[i]:
+                if MACD[i+i] - Signal[i+1] > 0 and MACD[i] - Signal[i] < 0:
+                    print("Death Cross Occurred!")
+                    sell_count -= 1
+                    break
+            else pass
 
         print("2.MACD의 천장 및 바닥 확인")
         # TODO
 
         print("3.Oscillator 상승 및 하락 확인")
-        # TODO
+        for i in range(0, 200):
+            if Oscillator[i+2] > Oscillator[i+1]:
+                if Oscillator[i+1] < Oscillator[i]:
+                    print("Positive Oscillator!")
+                    sell_count += 1
+                    break
+            elif Oscillator[i+2] < Oscillator[i+1]:
+                if Oscillator[i+1] > Oscillator[i]:
+                    print("Negative Oscillator!")
+                    sell_count -= 1
+                    break
+            else break
+
 
         # 최종 매매 판단
         if sell_count > 0:
-            #매수
-        else if sell_count < 0:
-            #매도
+            # 매수
+            # TODO
+
+        elif sell_count < 0:
+            # 매도
+            # TODO
 
 
 
