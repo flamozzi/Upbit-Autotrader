@@ -264,7 +264,7 @@ def main():
                     print("Death Cross Occurred!")
                     sell_count -= 1
                     break
-            else pass
+            else break
 
         print("2.MACD의 천장 및 바닥 확인")
         # TODO
