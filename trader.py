@@ -204,9 +204,9 @@ def main():
     medium_ema = make_EMA(medium_list)
     long_ema = make_EMA(long_list)
     
-    #########################################
+    ##########################################
     #평가 기준
-    #########################################
+    ##########################################
 
     MACD = make_MACD(medium_ema, long_ema)
 
@@ -264,10 +264,28 @@ def main():
                     print("Death Cross Occurred!")
                     sell_count -= 1
                     break
-            else break
+            else:
+                 break
 
         print("2.MACD의 천장 및 바닥 확인")
-        # TODO
+        # 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정
+        # 가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정
+        trade_price = candle_minute("KRW-BTC", count=200, unit='1')
+
+        for i in range(0, 200):
+            if trade_price[i+1] < trade_price[i]:
+                if MACD[i+1] > MACD[i]:
+                    print("천장이 가까움")
+                    sell_count += 1
+                    break                    
+            elif trade_price[i+1] > trade_price[i]:
+                if MACD[i+1] < MACD[i]:
+                    print("바닥이 가까움")
+                    sell_count -= 1
+                    break
+            else:
+                break
+            
 
         print("3.Oscillator 상승 및 하락 확인")
         for i in range(0, 200):
@@ -281,17 +299,19 @@ def main():
                     print("Negative Oscillator!")
                     sell_count -= 1
                     break
-            else break
-
+            else:
+                break
 
         # 최종 매매 판단
         if sell_count > 0:
             # 매수
             # TODO
+            pass
 
         elif sell_count < 0:
             # 매도
             # TODO
+            pass
 
 
 
