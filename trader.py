@@ -3,6 +3,7 @@ from pprint import pprint
 from urllib.parse import urlencode
 from requests import get, post, delete
 from jwt import encode
+import datetime
 
 ACCESS_KEY = ""
 SECRET_KEY = ""
@@ -183,6 +184,7 @@ def make_MACD(medium_ema, long_ema):
     MACD = []
     for i in range(0, 200):
         MACD.append(medium_ema[i] - long_ema[i])
+        MACD.reverse()
     return MACD
 
 def make_Oscillator(macd, signal):
@@ -190,6 +192,12 @@ def make_Oscillator(macd, signal):
     for i in range(0, 200):
         Oscillator.append(macd[i] - signal[i])
     return Oscillator
+
+def KRW_to_BTC(KRW):
+    trade_price = candle_minute("KRW-BTC", count=200, unit='1')[0]
+    trade_fee = orderable_info("KRW-BTC")["bid_fee"]
+    BTC = float(KRW) / float(trade_price) / (1 + float(trade_fee))
+    return BTC
 
 ##############################################################
 
@@ -234,95 +242,133 @@ def main():
 
     ###########################################
     
-    print("turn on the trader!")
+    print("turn on the trader!!!")
     sell_count = 0
 
     while True:
-        print("판단 근거 확인")
+        dt = datetime.datetime.now()
+        check_time = dt.strftime("%S")
+        if check_time == "00":
+            print("<판단 근거 확인>")
 
-        print("0.MACD의 상승 및 하락 확인")
-        if MACD[0] > MACD[1]:
-            sell_count += 1
-            print("MACD의 상승 추세")
-        elif MACD[0] < MACD[1]:
-            sell_count -= 1
-            print("MACD의 하락 추세")
-        print("sell_count: " + sell_count)
-
-        print("1.골든 크로스 및 데드 크로스 확인")
-        # 진성 및 가성 판단할 필요가 있음
-        # 진성 golden&death cross graph 개형 확인
-        # fake cross에 유의하여 수수료 낭비하지 않기
-        for i in range(0, 200):
-            if MACD[i+1] < MACD[i]:
-                if MACD[i+1] - Signal[i+1] < 0 and MACD[i] - Signal[i] > 0:
-                    print("Golden Cross Occurred!")
+            print("0.MACD의 상승 및 하락 확인")
+            for i in range(0, 200):
+                if MACD[i+5] > MACD[i+6]:
                     sell_count += 1
+                    print("  #MACD의 상승 추세")
                     break
-            elif MACD[i+1] > MACD[i]:
-                if MACD[i+i] - Signal[i+1] > 0 and MACD[i] - Signal[i] < 0:
-                    print("Death Cross Occurred!")
-                    sell_count -= 1
+                elif MACD[i+5] < MACD[i+6]:
+                    sell_count -= 1 
+                    print("  #MACD의 하락 추세")
                     break
-            else:
-                 break
+                else:
+                    print("  #변동사항 없음")
+                    break
+                
+            print("  sell_count: " + str(sell_count))
 
-        print("2.MACD의 천장 및 바닥 확인")
-        # 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정
-        # 가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정
-        trade_price = candle_minute("KRW-BTC", count=200, unit='1')
-
-        for i in range(0, 200):
-            if trade_price[i+1] < trade_price[i]:
-                if MACD[i+1] > MACD[i]:
-                    print("천장이 가까움")
-                    sell_count += 1
-                    break                    
-            elif trade_price[i+1] > trade_price[i]:
-                if MACD[i+1] < MACD[i]:
-                    print("바닥이 가까움")
-                    sell_count -= 1
+            print("1.골든 크로스 및 데드 크로스 확인")
+            # 진성 및 가성 판단할 필요가 있음
+            # 진성 golden&death cross graph 개형 확인
+            # fake cross에 유의하여 수수료 낭비하지 않기
+            for i in range(0, 200):
+                if MACD[i+6] < MACD[i+5]:
+                    if MACD[i+6] - Signal[i+6] < 0 and MACD[i+5] - Signal[i+5] > 0:
+                        print("  #Golden Cross Occurred!")
+                        sell_count += 1
+                        break
+                elif MACD[i+6] > MACD[i+5]:
+                    if MACD[i+6] - Signal[i+6] > 0 and MACD[i+5] - Signal[i+5] < 0:
+                        print("  #Death Cross Occurred!")
+                        sell_count -= 1
+                        break
+                else:
+                    print("  #변동사항 없음")
                     break
-            else:
-                break
             
+            print("  sell_count: " + str(sell_count))
 
-        print("3.Oscillator 상승 및 하락 확인")
-        for i in range(0, 200):
-            if Oscillator[i+2] > Oscillator[i+1]:
-                if Oscillator[i+1] < Oscillator[i]:
-                    print("Positive Oscillator!")
-                    sell_count += 1
+            print("2.MACD의 천장 및 바닥 확인")
+            # 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정
+            # 가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정
+            trade_price = candle_minute("KRW-BTC", count=200, unit='1')
+
+            for i in range(0, 200):
+                if trade_price[i+6] < trade_price[i+5]:
+                    if MACD[i+6] > MACD[i+5]:
+                        print("  #천장이 가까움")
+                        sell_count += 1
+                        break                    
+                elif trade_price[i+6] > trade_price[i+5]:
+                    if MACD[i+6] < MACD[i+5]:
+                        print("  #바닥이 가까움")
+                        sell_count -= 1
+                        break
+                else:
+                    print("  #변동사항 없음")
                     break
-            elif Oscillator[i+2] < Oscillator[i+1]:
-                if Oscillator[i+1] > Oscillator[i]:
-                    print("Negative Oscillator!")
-                    sell_count -= 1
+
+            print("  sell_count: " + str(sell_count))
+            
+                
+
+            print("3.Oscillator 상승 및 하락 확인")
+            for i in range(0, 200):
+                if Oscillator[i+7] > Oscillator[i+6]:
+                    if Oscillator[i+6] < Oscillator[i+5]:
+                        print("  #Positive Oscillator!")
+                        sell_count += 1
+                        break
+                elif Oscillator[i+7] < Oscillator[i+6]:
+                    if Oscillator[i+6] > Oscillator[i+5]:
+                        print("  #Negative Oscillator!")
+                        sell_count -= 1
+                        break
+                else:
+                    print("  #변동사항 없음")
                     break
+
+            print("  sell_count: " + str(sell_count))
+
+            # 최종 매매 판단
+            max_volume = get_account()[0]["balance"]
+            market_trade_price = candle_minute("KRW-BTC", count=200, unit='1')[0]
+            
+            print(" ")
+            print("최종sell_count: " + str(sell_count))
+
+            KRW = get_account()[0]["balance"]
+            BTC = KRW_to_BTC(KRW)
+            
+            if sell_count > 0:
+                # 매수(bid)
+                if max_volume == 0:
+                    print("존-버")
+                else:
+                    order("KRW-BTC", "bid", BTC, market_trade_price, "limit")
+                    print("매수하였습니다.")
+            elif sell_count < 0:
+                # 매도(ask)
+                if max_volume == 0:
+                    print("존-버")
+                else:
+                    order("KRW-BTC", "ask", BTC, market_trade_price, "limit")
+                    print("매도하였습니다.")
             else:
-                break
-
-        # 최종 매매 판단
-        if sell_count > 0:
-            # 매수
-            # TODO
+                print("존버하였습니다.")
+            
+            sell_count = 0
+            print("---------------------------------")
+            time.sleep(1)
+            continue
+        else:
             pass
 
-        elif sell_count < 0:
-            # 매도
-            # TODO
-            pass
-
-
-
-        # 시세 계속 확인(MACD, 단순 시세, 시그널 등)
-
-    # 각각 요인들을 확인하고 sell_count를 조정
-    # sell_count가 양수일 경우 -> 매수
-    # sell_count가 음수일 경우 -> 매도
-    # 초기 프로토 타입은 BTC로만 작동
-
-
+        # 각각 요인들을 확인하고 sell_count를 조정
+        # sell_count가 양수일 경우 -> 매수
+        # sell_count가 음수일 경우 -> 매도
+        # 초기 프로토 타입은 BTC로만 작동
+    
 ##############################################################
 
 if __name__ == '__main__':
