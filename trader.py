@@ -175,7 +175,7 @@ def make_EMA(param_list):
             ema = copy_list[i]
         else:
             k = float(2/(i+2))
-            ema = (copy_list[i]*(1-k)) + (ema*k))
+            ema = (copy_list[i]*(1-k)) + (ema*k)
         ema_list.append(ema)
     ema_list.reverse()
     return ema_list
