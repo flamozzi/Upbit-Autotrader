@@ -175,7 +175,7 @@ def make_EMA(param_list):
             ema = copy_list[i]
         else:
             k = float(2/(i+2))
-            ema = (copy_list[i]*k) + (ema*(1-k))
+            ema = (copy_list[i]*(1-k)) + (ema*k))
         ema_list.append(ema)
     ema_list.reverse()
     return ema_list
@@ -308,6 +308,7 @@ def main():
                 else:
                     print("  #변동사항 없음")
                     break
+            print("  sell_count: " + str(sell_count))
 
             print("3.단순 장단기 EMA의 우위 비교")
             for i in range(0, 200):
@@ -322,6 +323,7 @@ def main():
                 else:
                     print("  #변동사항 없음")
                     break
+            print("  sell_count: " + str(sell_count))
             
             '''
             print("MACD의 천장 및 바닥 확인") - 보류
