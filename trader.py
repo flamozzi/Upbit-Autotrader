@@ -250,6 +250,8 @@ def main():
         check_time = dt.strftime("%S")
         if check_time == "00":
             print("<판단 근거 확인>")
+            now = datetime.datetime.now()
+            print(now)
 
             print("0.MACD의 상승 및 하락 확인")
             for i in range(0, 200):
@@ -265,19 +267,21 @@ def main():
                     print("  #변동사항 없음")
                     break
                 
+            #pprint("MACD: ")
+            #pprint(MACD)
             print("  sell_count: " + str(sell_count))
 
-            print("1.골든 크로스 및 데드 크로스 확인")
+            print("1.MACD와 Signal의 골든 크로스 및 데드 크로스 확인")
             # 진성 및 가성 판단할 필요가 있음
             # 진성 golden&death cross graph 개형 확인
             # fake cross에 유의하여 수수료 낭비하지 않기
             for i in range(0, 200):
-                if MACD[i+6] < MACD[i+5]:
+                if Signal[i+6] < Signal[i+5]:
                     if MACD[i+6] - Signal[i+6] < 0 and MACD[i+5] - Signal[i+5] > 0:
                         print("  #Golden Cross Occurred!")
                         sell_count += 1
                         break
-                elif MACD[i+6] > MACD[i+5]:
+                elif Signal[i+6] > Signal[i+5]:
                     if MACD[i+6] - Signal[i+6] > 0 and MACD[i+5] - Signal[i+5] < 0:
                         print("  #Death Cross Occurred!")
                         sell_count -= 1
@@ -286,9 +290,41 @@ def main():
                     print("  #변동사항 없음")
                     break
             
+            #pprint("Signal: ")
+            #pprint(Signal)
             print("  sell_count: " + str(sell_count))
 
-            print("2.MACD의 천장 및 바닥 확인")
+            
+            print("2.장단기 EMA의 단순 골든 크로스 및 데드 크로스 확인")
+            for i in range(0, 200):
+                if medium_ema[i+6] - long_ema[i+6] < 0 and medium_ema[i+5] - long_ema[i+5] > 0:
+                    print("  #Golden Cross Occurred!")
+                    sell_count += 1
+                    break
+                elif medium_ema[i+6] - long_ema[i+6] > 0 and medium_ema[i+5] - long_ema[i+5] < 0:
+                    print("  #Death Cross Occurred!")
+                    sell_count -= 1
+                    break
+                else:
+                    print("  #변동사항 없음")
+                    break
+
+            print("3.단순 장단기 EMA의 우위 비교")
+            for i in range(0, 200):
+                if medium_ema[i+5] > long_ema[i+5]:
+                    print("  #단기 > 장기 EMA")
+                    sell_count += 1
+                    break
+                elif medium_ema[i+5] < long_ema[i+5]:
+                    print("  #단기 < 장기 EMA")
+                    sell_count -= 1
+                    break
+                else:
+                    print("  #변동사항 없음")
+                    break
+            
+            '''
+            print("MACD의 천장 및 바닥 확인") - 보류
             # 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정
             # 가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정
             trade_price = candle_minute("KRW-BTC", count=200, unit='1')
@@ -297,30 +333,29 @@ def main():
                 if trade_price[i+6] < trade_price[i+5]:
                     if MACD[i+6] > MACD[i+5]:
                         print("  #천장이 가까움")
-                        sell_count += 1
+                        sell_count -= 1
                         break                    
                 elif trade_price[i+6] > trade_price[i+5]:
                     if MACD[i+6] < MACD[i+5]:
                         print("  #바닥이 가까움")
-                        sell_count -= 1
+                        sell_count += 1
                         break
                 else:
                     print("  #변동사항 없음")
                     break
 
             print("  sell_count: " + str(sell_count))
-            
-                
+            '''
 
-            print("3.Oscillator 상승 및 하락 확인")
+            print("4.Oscillator 상승 및 하락 확인")
             for i in range(0, 200):
-                if Oscillator[i+7] > Oscillator[i+6]:
-                    if Oscillator[i+6] < Oscillator[i+5]:
+                if Oscillator[i+2] > Oscillator[i+1]:
+                    if Oscillator[i+1] < Oscillator[i]:
                         print("  #Positive Oscillator!")
                         sell_count += 1
                         break
-                elif Oscillator[i+7] < Oscillator[i+6]:
-                    if Oscillator[i+6] > Oscillator[i+5]:
+                elif Oscillator[i+2] < Oscillator[i+1]:
+                    if Oscillator[i+1] > Oscillator[i]:
                         print("  #Negative Oscillator!")
                         sell_count -= 1
                         break
@@ -328,6 +363,8 @@ def main():
                     print("  #변동사항 없음")
                     break
 
+            #pprint("Oscillator: ")
+            #pprint(Oscillator)
             print("  sell_count: " + str(sell_count))
 
             # 최종 매매 판단
@@ -346,16 +383,16 @@ def main():
                     print("존-버")
                 else:
                     order("KRW-BTC", "bid", BTC, market_trade_price, "limit")
-                    print("매수하였습니다.")
+                    print("매수")
             elif sell_count < 0:
                 # 매도(ask)
                 if max_volume == 0:
                     print("존-버")
                 else:
-                    order("KRW-BTC", "ask", BTC, market_trade_price, "limit")
-                    print("매도하였습니다.")
+                    order("KRW-BTC", "ask", max_volume, market_trade_price, "limit")
+                    print("매도")
             else:
-                print("존버하였습니다.")
+                print("존버")
             
             sell_count = 0
             print("---------------------------------")
