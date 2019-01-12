@@ -390,7 +390,7 @@ def main():
                 if max_volume == 0:
                     log("존-버")
                 else:
-                    #order("KRW-BTC", "bid", BTC, market_trade_price, "limit")
+                    #order("KRW-BTC", "bid", BTC * 0.1, market_trade_price, "limit")
                     log("매수")
             elif sell_count < 0:
                 # 매도(ask)
