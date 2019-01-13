@@ -5,8 +5,8 @@ from requests import get, post, delete
 from jwt import encode
 import datetime
 
-ACCESS_KEY = ""
-SECRET_KEY = ""
+ACCESS_KEY = "E10F3xqOUGAYxxFmExfGBo2xxx5Q1IsrpHqDszgx"
+SECRET_KEY = "1DjcP3cRxk7J4ymY4xkDxcnt9R1hXRT68FHDv3x3"
 
 ##############################################################
 
