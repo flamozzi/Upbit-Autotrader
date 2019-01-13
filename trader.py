@@ -3,12 +3,18 @@ from pprint import pprint
 from urllib.parse import urlencode
 from requests import get, post, delete
 from jwt import encode
+from key_file import ACCESS_KEY, SECRET_KEY
 import datetime
 
-ACCESS_KEY = "E10F3xqOUGAYxxFmExfGBo2xxx5Q1IsrpHqDszgx"
-SECRET_KEY = "1DjcP3cRxk7J4ymY4xkDxcnt9R1hXRT68FHDv3x3"
+################################################################
 
-##############################################################
+def log(msg, file_name="./log.txt"):
+    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    msg = f"[{time}] {msg}"
+    pprint(msg)
+    with open(file_name, "a", encoding='utf-8') as f:
+        f.write(msg + '\n')
+
 
 def get_account():
     # check available for all accounts
@@ -242,91 +248,91 @@ def main():
 
     ###########################################
     
-    print("turn on the trader!!!")
+    log("turn on the trader!!!")
     sell_count = 0
 
     while True:
         dt = datetime.datetime.now()
         check_time = dt.strftime("%S")
         if check_time == "00":
-            print("<판단 근거 확인>")
+            log("<판단 근거 확인>")
             now = datetime.datetime.now()
-            print(now)
+            log(now)
 
-            print("0.MACD의 상승 및 하락 확인")
+            log("0.MACD의 상승 및 하락 확인")
             for i in range(0, 200):
                 if MACD[i+5] > MACD[i+6]:
                     sell_count += 1
-                    print("  #MACD의 상승 추세")
+                    log("  #MACD의 상승 추세")
                     break
                 elif MACD[i+5] < MACD[i+6]:
                     sell_count -= 1 
-                    print("  #MACD의 하락 추세")
+                    log("  #MACD의 하락 추세")
                     break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
                 
-            #pprint("MACD: ")
-            #pprint(MACD)
-            print("  sell_count: " + str(sell_count))
+            #log("MACD: ")
+            #log(MACD)
+            log("  sell_count: " + str(sell_count))
 
-            print("1.MACD와 Signal의 골든 크로스 및 데드 크로스 확인")
+            log("1.MACD와 Signal의 골든 크로스 및 데드 크로스 확인")
             # 진성 및 가성 판단할 필요가 있음
             # 진성 golden&death cross graph 개형 확인
             # fake cross에 유의하여 수수료 낭비하지 않기
             for i in range(0, 200):
                 if Signal[i+6] < Signal[i+5]:
                     if MACD[i+6] - Signal[i+6] < 0 and MACD[i+5] - Signal[i+5] > 0:
-                        print("  #Golden Cross Occurred!")
+                        log("  #Golden Cross Occurred!")
                         sell_count += 1
                         break
                 elif Signal[i+6] > Signal[i+5]:
                     if MACD[i+6] - Signal[i+6] > 0 and MACD[i+5] - Signal[i+5] < 0:
-                        print("  #Death Cross Occurred!")
+                        log("  #Death Cross Occurred!")
                         sell_count -= 1
                         break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
             
-            #pprint("Signal: ")
-            #pprint(Signal)
-            print("  sell_count: " + str(sell_count))
+            #log("Signal: ")
+            #log(Signal)
+            log("  sell_count: " + str(sell_count))
 
             
-            print("2.장단기 EMA의 단순 골든 크로스 및 데드 크로스 확인")
+            log("2.장단기 EMA의 단순 골든 크로스 및 데드 크로스 확인")
             for i in range(0, 200):
                 if medium_ema[i+6] - long_ema[i+6] < 0 and medium_ema[i+5] - long_ema[i+5] > 0:
-                    print("  #Golden Cross Occurred!")
+                    log("  #Golden Cross Occurred!")
                     sell_count += 1
                     break
                 elif medium_ema[i+6] - long_ema[i+6] > 0 and medium_ema[i+5] - long_ema[i+5] < 0:
-                    print("  #Death Cross Occurred!")
+                    log("  #Death Cross Occurred!")
                     sell_count -= 1
                     break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
-            print("  sell_count: " + str(sell_count))
+            log("  sell_count: " + str(sell_count))
 
-            print("3.단순 장단기 EMA의 우위 비교")
+            log("3.단순 장단기 EMA의 우위 비교")
             for i in range(0, 200):
                 if medium_ema[i+5] > long_ema[i+5]:
-                    print("  #단기 > 장기 EMA")
+                    log("  #단기 > 장기 EMA")
                     sell_count += 1
                     break
                 elif medium_ema[i+5] < long_ema[i+5]:
-                    print("  #단기 < 장기 EMA")
+                    log("  #단기 < 장기 EMA")
                     sell_count -= 1
                     break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
-            print("  sell_count: " + str(sell_count))
+            log("  sell_count: " + str(sell_count))
             
             '''
-            print("MACD의 천장 및 바닥 확인") - 보류
+            log("MACD의 천장 및 바닥 확인") - 보류
             # 가격이 상승하고 있는데 MACD가 하강을 시작하면 천장이 가까운 것으로 추정
             # 가격이 하락하고 있는데 MACD가 상승을 시작하면 바닥이 가까운 것으로 추정
             trade_price = candle_minute("KRW-BTC", count=200, unit='1')
@@ -334,47 +340,47 @@ def main():
             for i in range(0, 200):
                 if trade_price[i+6] < trade_price[i+5]:
                     if MACD[i+6] > MACD[i+5]:
-                        print("  #천장이 가까움")
+                        log("  #천장이 가까움")
                         sell_count -= 1
                         break                    
                 elif trade_price[i+6] > trade_price[i+5]:
                     if MACD[i+6] < MACD[i+5]:
-                        print("  #바닥이 가까움")
+                        log("  #바닥이 가까움")
                         sell_count += 1
                         break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
 
-            print("  sell_count: " + str(sell_count))
+            log("  sell_count: " + str(sell_count))
             '''
 
-            print("4.Oscillator 상승 및 하락 확인")
+            log("4.Oscillator 상승 및 하락 확인")
             for i in range(0, 200):
                 if Oscillator[i+2] > Oscillator[i+1]:
                     if Oscillator[i+1] < Oscillator[i]:
-                        print("  #Positive Oscillator!")
+                        log("  #Positive Oscillator!")
                         sell_count += 1
                         break
                 elif Oscillator[i+2] < Oscillator[i+1]:
                     if Oscillator[i+1] > Oscillator[i]:
-                        print("  #Negative Oscillator!")
+                        log("  #Negative Oscillator!")
                         sell_count -= 1
                         break
                 else:
-                    print("  #변동사항 없음")
+                    log("  #변동사항 없음")
                     break
 
-            #pprint("Oscillator: ")
-            #pprint(Oscillator)
-            print("  sell_count: " + str(sell_count))
+            #log("Oscillator: ")
+            #log(Oscillator)
+            log("  sell_count: " + str(sell_count))
 
             # 최종 매매 판단
             max_volume = get_account()[0]["balance"]
             market_trade_price = candle_minute("KRW-BTC", count=200, unit='1')[0]
             
-            print(" ")
-            print("최종sell_count: " + str(sell_count))
+            log(" ")
+            log("최종sell_count: " + str(sell_count))
 
             KRW = get_account()[0]["balance"]
             BTC = KRW_to_BTC(KRW)
@@ -382,22 +388,23 @@ def main():
             if sell_count > 0:
                 # 매수(bid)
                 if max_volume == 0:
-                    print("존-버")
+                    log("존-버")
                 else:
+                    #BTC퍼센트는 유도리 있게 조절 일단은 100%
                     order("KRW-BTC", "bid", BTC, market_trade_price, "limit")
-                    print("매수")
+                    log("매수")
             elif sell_count < 0:
                 # 매도(ask)
                 if max_volume == 0:
-                    print("존-버")
+                    log("존-버")
                 else:
                     order("KRW-BTC", "ask", max_volume, market_trade_price, "limit")
-                    print("매도")
+                    log("매도")
             else:
-                print("존버")
+                log("존버")
             
             sell_count = 0
-            print("---------------------------------")
+            log("---------------------------------")
             time.sleep(1)
             continue
         else:

@@ -1,0 +1,5 @@
+key_file.py
+log.txt
+__pycache__
+*.pyc
+*.log
