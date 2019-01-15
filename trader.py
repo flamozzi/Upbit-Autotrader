@@ -184,6 +184,7 @@ def make_EMA(param_list):
             ema = (copy_list[i]*(1-k)) + (ema*k)
         ema_list.append(ema)
     ema_list.reverse()
+    copy_list.reverse()
     return ema_list
 
 def make_MACD(medium_ema, long_ema):
