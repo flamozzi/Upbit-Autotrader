@@ -6,7 +6,7 @@ from jwt import encode
 from key_file import ACCESS_KEY, SECRET_KEY
 import datetime
 
-##############################################################
+################################################################
 
 def log(msg, file_name="./log.txt"):
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
